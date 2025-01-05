@@ -1,40 +1,26 @@
 #include <Arduino.h>
 
-#define LILYGO_T5_V213
-
+//#define LILYGO_T5_V213
+#define E_Paper_ESP32_Driver_Board
 
 
 #include <boards.h>
-#include <GxEPD.h>
+#include <GxEPD2.h>
 #include <SD.h>
 #include <FS.h>
 #define SdFile File
 #define seekSet seek
 
-#if defined(LILYGO_T5_V213)
-#include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-#else
-// #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
-// #include <GxGDEW0154Z04/GxGDEW0154Z04.h>  // 1.54" b/w/r 200x200
-// #include <GxGDEW0154Z17/GxGDEW0154Z17.h>  // 1.54" b/w/r 152x152
-// #include <GxGDEH0154D67/GxGDEH0154D67.h>  // 1.54" b/w
-// #include <GxDEPG0150BN/GxDEPG0150BN.h>    // 1.51" b/w   form DKE GROUP
-// #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
-// #include <GxDEPG0290R/GxDEPG0290R.h>      // 2.9" b/w/r  form DKE GROUP
-// #include <GxDEPG0290B/GxDEPG0290B.h>      // 2.9" b/w    form DKE GROUP
-// #include <GxGDEW029Z10/GxGDEW029Z10.h>    // 2.9" b/w/r  form GoodDisplay
-// #include <GxGDEW0213Z16/GxGDEW0213Z16.h>  // 2.13" b/w/r form GoodDisplay
-// #include <GxGDE0213B1/GxGDE0213B1.h>      // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B72/GxGDEH0213B72.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B73/GxGDEH0213B73.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEM0213B74/GxGDEM0213B74.h>  // 2.13" b/w  form GoodDisplay 4-color
-// #include <GxGDEW0213M21/GxGDEW0213M21.h>  // 2.13"  b/w Ultra wide temperature , form GoodDisplay
-#include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-// #include <GxGDEW027W3/GxGDEW027W3.h>      // 2.7" b/w   form GoodDisplay
-// #include <GxGDEW027C44/GxGDEW027C44.h>    // 2.7" b/w/r form GoodDisplay
-// #include <GxGDEH029A1/GxGDEH029A1.h>      // 2.9" b/w   form GoodDisplay
-// #include <GxDEPG0750BN/GxDEPG0750BN.h>    // 7.5" b/w   form DKE GROUP
-#endif
+//#include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
+
+//#include <GxGDEW0583T7/GxGDEW0583T7.h>    // 5.83" b/w  648x480 FPC-8601B
+//#include <GxGDEW075T8/GxGDEW075T8.h>    // 5.8"???????? b/w   from Dalian Good Display Co.
+
+//#include <GxDEPG0750BN/GxDEPG0750BN.h>    // Не работает должным образом 7.5" b/w   form DKE GROUP
+//#include <GxGDEW075T7/GxGDEW075T7.h>    // Не работает должным образом 7.5" b/w   from Dalian Good Display Co.
+#include <GxGDEW075Z08/GxGDEW075Z08.h>    // 7.5" GDEW075Z08 e-Paper from Dalian Good Display Co.
+
+
 
 #include GxEPD_BitmapExamples
 
@@ -48,14 +34,22 @@
 #include <WiFi.h>
 
 
-GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
-GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
+#if defined(E_Paper_ESP32_Driver_Board)
+    GxIO_Class io(EPD_SCLK, EPD_MISO, EPD_MOSI,  EPD_CS, EPD_DC,  EPD_RSET);
+    GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
+#else
+    GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
+    GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
+#endif
 
 #if defined(_HAS_SDCARD_) && !defined(_USE_SHARED_SPI_BUS_)
 SPIClass SDSPI(VSPI);
 #endif
-bool rlst = false;
 
+
+
+
+bool rlst = false;
 void LilyGo_logo();
 bool setupSDCard(void);
 void drawBitmapFromSD(const char *filename, int16_t x, int16_t y, bool with_color);
@@ -105,6 +99,13 @@ bool setupSDCard(void)
 }
 
 
+
+
+
+
+
+
+
 void LilyGo_logo(void)
 {
     display.setRotation(0);
@@ -115,9 +116,7 @@ void LilyGo_logo(void)
     display.setRotation(1);
     display.setTextColor(GxEPD_BLACK);
     display.setFont();
-#if defined(LILYGO_T5_V102)
-    display.setCursor(0, display.height() - 15);
-#else
+
     display.setCursor(20, display.height() - 15);
 #endif
     String sizeString = "SD:" + String(SD.cardSize() / 1024.0 / 1024.0 / 1024.0) + "G";
@@ -130,9 +129,9 @@ void LilyGo_logo(void)
     display.getTextBounds(str, 0, 0, &x1, &x2, &w, &h);
     display.setCursor(display.width() - w, display.height() - 15);
     display.println(str);
-#endif
 
     display.update();
+    
 }
 
 
@@ -320,6 +319,73 @@ uint32_t read32(SdFile &f)
 
 
 
+void page_wifi_scan(int x, int y, String str)
+{
+    display.setRotation(0);
+    display.fillScreen(GxEPD_WHITE);
+
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(&FreeMonoBold12pt7b);
+
+    display.setCursor(x, y);
+    display.println(str);
+        
+}
+
+
+
+void testWiFi()
+{
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    // WiFi.scanNetworks will return the number of networks found
+    int n = WiFi.scanNetworks();
+    String WiFi_scan_result;
+
+    Serial.println("scan done");
+    if (n == 0) {
+        Serial.println("no networks found");
+        WiFi_scan_result = "no networks found";
+    } else {
+        Serial.print(n);
+        Serial.println(" networks found");
+        for (int i = 0; i < n; ++i) {
+            // Print SSID and RSSI for each network found
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.print(WiFi.SSID(i));
+            Serial.print(" (");
+            Serial.print(WiFi.RSSI(i));
+            Serial.print(")");
+            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+            delay(10);
+
+            // WiFi_scan_result = i + ": "+WiFi.SSID(i)+" ("+WiFi.RSSI(i)+")"+ ((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+            //page_wifi_scan(20, i+10, WiFi_scan_result);
+            
+        }
+    }
+    WiFi_scan_result = 1 + ": "+WiFi.SSID(1)+" ("+WiFi.RSSI(1)+")"+ ((WiFi.encryptionType(1) == WIFI_AUTH_OPEN) ? " " : "*");
+    page_wifi_scan(20, 20, WiFi_scan_result);
+    Serial.println("");
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -328,25 +394,69 @@ uint32_t read32(SdFile &f)
 void setup(void)
 {
     Serial.begin(115200);
-    Serial.println();
-    Serial.println(F("******************* setup *******************"));
+    Serial.println(" ");
+    Serial.println(F("******************* DISPLAY BRGIN *******************"));
+    Serial.println(" ");
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init(); // enable diagnostic output on Serial
 
+    #ifdef LILYGO_T5_V213
     rlst = setupSDCard();
+    #endif
 
     LilyGo_logo();
+
     delay(2000);
-    Serial.println(F("******************* setup done ******************"));
+
+
+    // display.setRotation(0);
+    // display.fillScreen(GxEPD_WHITE);
+    // // testWiFi();
+    
+    // display.update();
+    // ;
+    
+    display.setRotation(0);
+    display.setFont(&FreeMonoBold12pt7b);
+    display.fillScreen(GxEPD_WHITE);
+    display.setTextColor(GxEPD_BLACK);
+    display.setCursor(20, 30);
+    display.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+    display.setCursor(20, 50);
+    display.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+    display.update();
+
+
+    display.powerDown();
+
+    Serial.println(" ");
+    Serial.println(F("******************* BEGIN IS OK *********************"));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void loop()
 {
 
-     drawBitmaps_test();
-    delay(2000);
+    //  drawBitmaps_test();
+    // delay(2000);
 }
 
 

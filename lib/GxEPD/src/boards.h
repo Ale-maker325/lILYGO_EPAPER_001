@@ -31,6 +31,36 @@
 #define _HAS_LED_
 #define _HAS_SDCARD_
 
+#elif defined(E_Paper_ESP32_Driver_Board)
+
+#define EPD_MOSI                (14)
+#define EPD_MISO                (-1)
+#define EPD_SCLK                (13)
+#define EPD_CS                  (15)
+
+#define EPD_BUSY                (25)
+#define EPD_RSET                (26)
+#define EPD_DC                  (27)
+
+#define SDCARD_CS               (-1)
+#define SDCARD_MOSI             (-1)
+#define SDCARD_MISO             (-1)
+#define SDCARD_SCLK             (-1)
+
+#define BUTTON_1                (-1)
+#define BUTTONS                 {-1}
+
+#define BUTTON_COUNT            (1)
+
+#define LED_PIN                 (-1)
+#define LED_ON                  (LOW)
+
+#define ADC_PIN                 (-1)
+
+// #define _HAS_ADC_DETECTED_
+// #define _HAS_LED_
+// #define _HAS_SDCARD_
+
 #elif defined(LILYGO_T5_V22)
 
 #define EPD_MOSI                (23)
